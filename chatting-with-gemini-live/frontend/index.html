@@ -73,12 +73,13 @@
 
   <div class="container">
     <!-- Left Column: API Configuration -->
-    <div class="left-column">
+    <!-- <div class="left-column"> -->
       <!-- Connection Setup -->
+      <!--
       <section>
         <h2>API Configuration</h2>
 
-        <!-- Connection Settings -->
+        !-- Connection Settings --
         <details open>
           <summary>Connection Settings</summary>
           <p>Connection will be established directly to the Gemini API using an ephemeral token from the backend.</p>
@@ -89,7 +90,7 @@
           </div>
         </details>
 
-        <!-- Gemini Behavior Settings -->
+        !-- Gemini Behavior Settings --
         <br />
         <details open>
           <summary>Gemini Behavior</summary>
@@ -127,7 +128,7 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           </div>
         </details>
 
-        <!-- Custom Tools -->
+        !-- Custom Tools --
         <br />
         <details>
           <summary>Custom Tools</summary>
@@ -145,7 +146,7 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           </div>
         </details>
 
-        <!-- Transcription Settings -->
+        !-- Transcription Settings --
         <br />
         <details>
           <summary>Transcription Settings</summary>
@@ -160,7 +161,7 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           </div>
         </details>
 
-        <!-- Activity Detection Settings -->
+        !-- Activity Detection Settings --
         <br />
         <details>
           <summary>Activity Detection Settings</summary>
@@ -234,7 +235,7 @@ You are a helpful assistant. Be concise and friendly.</textarea>
 
         <br />
 
-        <!-- Setup Message JSON Display -->
+        !-- Setup Message JSON Display --
         <details id="setupJsonSection" style="display: none">
           <summary>
             Setup Message JSON (raw config sent to Gemini API)
@@ -242,7 +243,8 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           <pre id="setupJsonDisplay"></pre>
         </details>
       </section>
-    </div>
+      -->
+    <!--</div>-->
 
     <!-- Right Column: Media and Chat -->
     <div class="right-column">
@@ -250,6 +252,18 @@ You are a helpful assistant. Be concise and friendly.</textarea>
       <section>
         <h2>Media Streaming</h2>
 
+        <div>
+          <button id="connectBtn">Connect</button>
+          <button id="disconnectBtn">Disconnect</button>
+        </div>
+
+        <br />
+
+        <div id="connectionStatus">Not connected</div>
+
+        <br />
+
+        !-- Setup Message JSON Display --
         <div class="container">
           <div class="left-column">
             <!-- Device Selectors -->

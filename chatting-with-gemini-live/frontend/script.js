@@ -17,22 +17,22 @@ const elements = {};
 // Initialize DOM references
 function initDOM() {
   const ids = [
-    "model",
-    "systemInstructions",
-    "enableInputTranscription",
-    "enableOutputTranscription",
-    "enableGrounding",
-    "enableAlertTool",
-    "enableCssStyleTool",
-    "voiceSelect",
-    "temperature",
-    "temperatureValue",
-    "disableActivityDetection",
-    "silenceDuration",
-    "prefixPadding",
-    "endSpeechSensitivity",
-    "startSpeechSensitivity",
-    "activityHandling",
+    //"model",
+    //"systemInstructions",
+    //"enableInputTranscription",
+    //"enableOutputTranscription",
+    //"enableGrounding",
+    //"enableAlertTool",
+    //"enableCssStyleTool",
+    //"voiceSelect",
+    //"temperature",
+    //"temperatureValue",
+    //"disableActivityDetection",
+    //"silenceDuration",
+    //"prefixPadding",
+    //"endSpeechSensitivity",
+    //"startSpeechSensitivity",
+    //"activityHandling",
     "connectBtn",
     "disconnectBtn",
     "connectionStatus",
@@ -114,13 +114,30 @@ async function connect() {
   try {
     updateStatus("connectionStatus", "Fetching ephemeral token...");
 
+  //elements["model"] = 'gemini-3.1-flash-live-preview';
+  //elements["systemInstructions"] = 'You are a helpful assistant. Be concise and friendly.';
+  //elements["enableInputTranscription"] = true;
+  //elements["enableOutputTranscription"] = false;
+  //elements["enableGrounding"] = false;
+  //elements["enableAlertTool"] = false;
+  //elements["enableCssStyleTool"] = false;
+  //elements["voiceSelect"] = "Puck";
+  //elements["temperature"] = "1.0";
+  //elements["temperatureValue"] = "1.0";
+  //elements["disableActivityDetection"] = false;
+  //elements["silenceDuration"] = "500";
+  //elements["prefixPadding"] = "500";
+  //elements["endSpeechSensitivity"] = "END_SENSITIVITY_UNSPECIFIED";
+  //elements["startSpeechSensitivity"] = "START_SENSITIVITY_UNSPECIFIED";
+  //elements["activityHandling"] = "ACTIVITY_HANDLING_UNSPECIFIED";
+
     // Fetch token from backend
     const response = await fetch("/api/token", { method: "POST" });
     if (!response.ok) {
       throw new Error(`Failed to fetch token: ${response.statusText}`);
     }
     const { token } = await response.json();
-    const model = elements.model.value;
+    const model = 'gemini-3.1-flash-live-preview'; //elements.model.value;
 
     updateStatus("connectionStatus", "Connecting...");
 
@@ -128,45 +145,45 @@ async function connect() {
     state.client = new GeminiLiveAPI(token, model);
 
     // Configure settings
-    state.client.systemInstructions = elements.systemInstructions.value;
-    state.client.inputAudioTranscription =
-      elements.enableInputTranscription.checked;
-    state.client.outputAudioTranscription =
-      elements.enableOutputTranscription.checked;
-    state.client.googleGrounding = elements.enableGrounding.checked;
+    state.client.systemInstructions = 'You are a helpful assistant. Be concise and friendly.'; //elements.systemInstructions.value;
+    state.client.inputAudioTranscription = true;
+      //elements.enableInputTranscription.checked;
+    state.client.outputAudioTranscription = true;
+      //elements.enableOutputTranscription.checked;
+    state.client.googleGrounding = false; //elements.enableGrounding.checked;
     state.client.responseModalities = ["AUDIO"];
-    state.client.voiceName = elements.voiceSelect.value;
-    state.client.temperature = parseFloat(elements.temperature.value);
+    state.client.voiceName = 'Puck'; //elements.voiceSelect.value;
+    state.client.temperature = 1.0; //parseFloat(elements.temperature.value);
 
     // Set automatic activity detection configuration
     state.client.automaticActivityDetection = {
-      disabled: elements.disableActivityDetection.checked,
-      silence_duration_ms: parseInt(elements.silenceDuration.value),
-      prefix_padding_ms: parseInt(elements.prefixPadding.value),
-      end_of_speech_sensitivity: elements.endSpeechSensitivity.value,
-      start_of_speech_sensitivity: elements.startSpeechSensitivity.value,
+      disabled: false, //elements.disableActivityDetection.checked,
+      silence_duration_ms: 500, // parseInt(elements.silenceDuration.value),
+      prefix_padding_ms: 500, // parseInt(elements.prefixPadding.value),
+      end_of_speech_sensitivity: "END_SENSITIVITY_UNSPECIFIED", //elements.endSpeechSensitivity.value,
+      start_of_speech_sensitivity: "START_SENSITIVITY_UNSPECIFIED", //elements.startSpeechSensitivity.value,
     };
 
     // Set activity handling
-    state.client.activityHandling = elements.activityHandling.value;
+    state.client.activityHandling = "ACTIVITY_HANDLING_UNSPECIFIED"; //elements.activityHandling.value;
 
     // Add custom tools only if Google grounding is disabled
-    const isGroundingEnabled = elements.enableGrounding.checked;
+    const isGroundingEnabled = false; //elements.enableGrounding.checked;
 
     if (!isGroundingEnabled) {
       // Add alert tool if enabled
-      if (elements.enableAlertTool.checked) {
-        const alertTool = new ShowAlertTool();
-        state.client.addFunction(alertTool);
-        console.log("✅ Alert tool enabled");
-      }
+      //if (elements.enableAlertTool.checked) {
+      //  const alertTool = new ShowAlertTool();
+      //  state.client.addFunction(alertTool);
+      //  console.log("✅ Alert tool enabled");
+      //}
 
       // Add CSS style tool if enabled
-      if (elements.enableCssStyleTool.checked) {
-        const cssStyleTool = new AddCSSStyleTool();
-        state.client.addFunction(cssStyleTool);
-        console.log("✅ CSS style tool enabled");
-      }
+      //if (elements.enableCssStyleTool.checked) {
+      //  const cssStyleTool = new AddCSSStyleTool();
+      //  state.client.addFunction(cssStyleTool);
+      //  console.log("✅ CSS style tool enabled");
+      //}
     } else {
       console.log(
         "⚠️ Custom tools disabled due to Google grounding being enabled"
@@ -258,14 +275,14 @@ function handleMessage(message) {
       addMessage("Ready!", "system");
 
       // Display the setup JSON
-      if (state.client && state.client.lastSetupMessage) {
-        elements.setupJsonDisplay.textContent = JSON.stringify(
-          state.client.lastSetupMessage,
-          null,
-          2
-        );
-        elements.setupJsonSection.style.display = "block";
-      }
+      //if (state.client && state.client.lastSetupMessage) {
+      //  elements.setupJsonDisplay.textContent = JSON.stringify(
+      //    state.client.lastSetupMessage,
+      //    null,
+      //    2
+      //  );
+      //  elements.setupJsonSection.style.display = "block";
+      //}
       break;
 
     case MultimodalLiveResponseType.TOOL_CALL:
@@ -500,7 +517,7 @@ function initEventListeners() {
   elements.startScreenBtn.addEventListener("click", toggleScreen);
   elements.sendBtn.addEventListener("click", sendMessage);
   elements.volume.addEventListener("input", updateVolume);
-  elements.temperature.addEventListener("input", updateTemperature);
+  //elements.temperature.addEventListener("input", updateTemperature);
 
   elements.chatInput.addEventListener("keypress", (e) => {
     if (e.key === "Enter") sendMessage();
