@@ -45,8 +45,8 @@ function initDOM() {
     "volume",
     "volumeValue",
     "chatContainer",
-    "chatInput",
-    "sendBtn",
+    //"chatInput",
+    //"sendBtn",
     "debugInfo",
     "setupJsonSection",
     "setupJsonDisplay",
@@ -515,13 +515,13 @@ function initEventListeners() {
   elements.startAudioBtn.addEventListener("click", toggleAudio);
   elements.startVideoBtn.addEventListener("click", toggleVideo);
   elements.startScreenBtn.addEventListener("click", toggleScreen);
-  elements.sendBtn.addEventListener("click", sendMessage);
+  //elements.sendBtn.addEventListener("click", sendMessage);
   elements.volume.addEventListener("input", updateVolume);
   //elements.temperature.addEventListener("input", updateTemperature);
 
-  elements.chatInput.addEventListener("keypress", (e) => {
-    if (e.key === "Enter") sendMessage();
-  });
+  //elements.chatInput.addEventListener("keypress", (e) => {
+  //  if (e.key === "Enter") sendMessage();
+  //});
 }
 
 // Initialize

@@ -66,9 +66,9 @@
 </head>
 
 <body>
-  <h1>Gemini Live API - Vanilla JS Example</h1>
+  <h1>Testing Gemini Live</h1>
   <p>
-    Vanilla JavaScript implementation with audio, video, and text streaming
+    Voice LLM with audio, video, and text streaming
   </p>
 
   <div class="container">
@@ -259,11 +259,10 @@ You are a helpful assistant. Be concise and friendly.</textarea>
 
         <br />
 
-        <div id="connectionStatus">Not connected</div>
+        <div id="connectionStatus">Not connected <span id="debugInfo" style="display:none">Ready to connect...</span></div>
 
         <br />
 
-        !-- Setup Message JSON Display --
         <div class="container">
           <div class="left-column">
             <!-- Device Selectors -->
@@ -316,17 +315,21 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           <div>Connect to Gemini to start chatting</div>
         </div>
         <br />
+        <!--
         <div>
           <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
           <button id="sendBtn">Send</button>
         </div>
+        -->
       </section>
 
       <!-- Debug Info -->
+      <!--
       <section>
         <h2>Debug Info</h2>
         <pre id="debugInfo">Ready to connect...</pre>
       </section>
+      -->
     </div>
   </div>
 
