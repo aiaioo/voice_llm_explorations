@@ -34,8 +34,6 @@ function initDOM() {
     //"endSpeechSensitivity",
     //"startSpeechSensitivity",
     //"activityHandling",
-    "connectBtn",
-    "disconnectBtn",
     "connectionStatus",
     "startAudioBtn",
     "startVideoBtn",
@@ -419,21 +417,12 @@ function handleError(error) {
 async function toggleAudio() {
   if (!state.audio.isStreaming) {
     try {
-      // Initialize streamer if needed
-      if (!state.audio.streamer && state.client) {
-        state.audio.streamer = new AudioStreamer(state.client);
-      }
-
-      if (state.audio.streamer) {
-        // Get selected microphone device ID
-        const selectedMicId = elements.micSelect.value;
-        await state.audio.streamer.start(selectedMicId);
-        state.audio.isStreaming = true;
-        elements.startAudioBtn.textContent = "Stop Audio";
-        addMessage("[Microphone on]", "system");
-      } else {
-        addMessage("[Connect to Gemini first]", "system");
-      }
+      await connect();
+      const selectedMicId = elements.micSelect.value;
+      await state.audio.streamer.start(selectedMicId);
+      state.audio.isStreaming = true;
+      elements.startAudioBtn.textContent = "Stop Audio";
+      addMessage("[Microphone on]", "system");
     } catch (error) {
       addMessage("[Audio error: " + error.message + "]", "system");
     }
@@ -442,6 +431,7 @@ async function toggleAudio() {
     state.audio.isStreaming = false;
     elements.startAudioBtn.textContent = "Start Audio";
     addMessage("[Microphone off]", "system");
+    disconnect();
   }
 }
 
@@ -576,8 +566,6 @@ function updateTemperature() {
 
 // Event listeners
 function initEventListeners() {
-  elements.connectBtn.addEventListener("click", connect);
-  elements.disconnectBtn.addEventListener("click", disconnect);
   elements.startAudioBtn.addEventListener("click", toggleAudio);
   elements.startVideoBtn.addEventListener("click", toggleVideo);
   elements.startScreenBtn.addEventListener("click", toggleScreen);
