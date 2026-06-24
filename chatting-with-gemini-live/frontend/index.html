@@ -63,27 +63,28 @@
       color: white;
     }
 
-    #userSpeakingContainer {
-      display: none;
+    #vizWrapper {
+      display: grid;
+      grid-template-columns: max-content 1fr;
       align-items: center;
-      gap: 10px;
+      column-gap: 10px;
+      row-gap: 8px;
       margin: 8px 0;
+    }
+
+    #userSpeakingContainer,
+    #aiSpeakingContainer {
+      display: none; /* set to "contents" when active */
+    }
+
+    #userSpeakingLabel,
+    #aiSpeakingLabel {
+      white-space: nowrap;
     }
 
     #userAudioViz {
       border-radius: 4px;
       background: #f0fff4;
-    }
-
-    #aiSpeakingContainer {
-      display: none;
-      align-items: center;
-      gap: 10px;
-      margin: 8px 0;
-    }
-
-    #aiSpeakingLabel {
-      white-space: nowrap;
     }
 
     #aiAudioViz {
@@ -313,14 +314,16 @@ You are a helpful assistant. Be concise and friendly.</textarea>
 
           <div class="right-column">
 
-            <div id="userSpeakingContainer">
-              <span id="userSpeakingLabel">You speaking</span>
-              <canvas id="userAudioViz" width="260" height="48"></canvas>
-            </div>
+            <div id="vizWrapper">
+              <div id="userSpeakingContainer">
+                <span id="userSpeakingLabel">You speaking</span>
+                <canvas id="userAudioViz" width="260" height="48"></canvas>
+              </div>
 
-            <div id="aiSpeakingContainer">
-              <span id="aiSpeakingLabel">Gemini speaking</span>
-              <canvas id="aiAudioViz" width="260" height="48"></canvas>
+              <div id="aiSpeakingContainer">
+                <span id="aiSpeakingLabel">Gemini speaking</span>
+                <canvas id="aiAudioViz" width="260" height="48"></canvas>
+              </div>
             </div>
 
             <video id="videoPreview" autoplay playsinline muted hidden width="400"></video>

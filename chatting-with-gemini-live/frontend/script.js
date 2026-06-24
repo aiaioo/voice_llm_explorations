@@ -249,7 +249,7 @@ function disconnect() {
 function startInputVisualization() {
   if (state.user.speaking) return;
   state.user.speaking = true;
-  elements.userSpeakingContainer.style.display = "flex";
+  elements.userSpeakingContainer.style.display = "contents";
 
   const canvas = elements.userAudioViz;
   const ctx = canvas.getContext("2d");
@@ -307,7 +307,7 @@ function stopInputVisualization() {
 function startAudioVisualization() {
   if (state.ai.speaking) return;
   state.ai.speaking = true;
-  elements.aiSpeakingContainer.style.display = "flex";
+  elements.aiSpeakingContainer.style.display = "contents";
 
   const canvas = elements.aiAudioViz;
   const ctx = canvas.getContext("2d");
