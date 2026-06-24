@@ -9,6 +9,7 @@ const state = {
   audio: { streamer: null, player: null, isStreaming: false },
   video: { streamer: null, isStreaming: false },
   screen: { capture: null, isSharing: false },
+  user: { speaking: false, animationId: null },
   ai: { speaking: false, animationId: null },
 };
 
@@ -49,6 +50,8 @@ function initDOM() {
     "debugInfo",
     "setupJsonSection",
     "setupJsonDisplay",
+    "userSpeakingContainer",
+    "userAudioViz",
     "aiSpeakingContainer",
     "aiAudioViz",
   ];
@@ -242,7 +245,65 @@ function disconnect() {
   elements.videoPreview.srcObject = null;
 }
 
-// Audio visualization
+// Input audio visualization (microphone → Gemini)
+function startInputVisualization() {
+  if (state.user.speaking) return;
+  state.user.speaking = true;
+  elements.userSpeakingContainer.style.display = "flex";
+
+  const canvas = elements.userAudioViz;
+  const ctx = canvas.getContext("2d");
+  const analyser = state.audio.streamer && state.audio.streamer.analyserNode;
+  if (!analyser) return;
+
+  const bufferLength = analyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+  const barCount = 32;
+  const barSpacing = 2;
+  const barWidth = (canvas.width - barSpacing * (barCount - 1)) / barCount;
+
+  function draw() {
+    state.user.animationId = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < barCount; i++) {
+      const binIndex = Math.floor((i / barCount) * (bufferLength * 0.75));
+      const amplitude = dataArray[binIndex] / 255;
+      const barHeight = Math.max(3, amplitude * canvas.height);
+
+      const x = i * (barWidth + barSpacing);
+      const y = (canvas.height - barHeight) / 2;
+
+      // Green gradient based on amplitude
+      const green = Math.round(157 + amplitude * 55);
+      const alpha = 0.5 + amplitude * 0.5;
+      ctx.fillStyle = `rgba(15, ${green}, 88, ${alpha})`;
+      ctx.beginPath();
+      ctx.roundRect(x, y, barWidth, barHeight, 2);
+      ctx.fill();
+    }
+  }
+
+  draw();
+}
+
+function stopInputVisualization() {
+  if (state.user.animationId) {
+    cancelAnimationFrame(state.user.animationId);
+    state.user.animationId = null;
+  }
+  state.user.speaking = false;
+  elements.userSpeakingContainer.style.display = "none";
+
+  const canvas = elements.userAudioViz;
+  if (canvas) {
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
+// Output audio visualization (Gemini → speaker)
 function startAudioVisualization() {
   if (state.ai.speaking) return;
   state.ai.speaking = true;
@@ -423,10 +484,12 @@ async function toggleAudio() {
       state.audio.isStreaming = true;
       elements.startAudioBtn.textContent = "Stop Audio";
       addMessage("[Microphone on]", "system");
+      startInputVisualization();
     } catch (error) {
       addMessage("[Audio error: " + error.message + "]", "system");
     }
   } else {
+    stopInputVisualization();
     if (state.audio.streamer) state.audio.streamer.stop();
     state.audio.isStreaming = false;
     elements.startAudioBtn.textContent = "Start Audio";

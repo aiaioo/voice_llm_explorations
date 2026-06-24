@@ -77,7 +77,12 @@ class AudioStreamer {
       const source = this.audioContext.createMediaStreamSource(
         this.mediaStream
       );
-      source.connect(this.audioWorklet);
+
+      // Tap an analyser for visualizations
+      this.analyserNode = this.audioContext.createAnalyser();
+      this.analyserNode.fftSize = 256;
+      source.connect(this.analyserNode);
+      this.analyserNode.connect(this.audioWorklet);
 
       this.isStreaming = true;
       console.log("🎤 Audio streaming started");

@@ -63,6 +63,18 @@
       color: white;
     }
 
+    #userSpeakingContainer {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+    }
+
+    #userAudioViz {
+      border-radius: 4px;
+      background: #f0fff4;
+    }
+
     #aiSpeakingContainer {
       display: none;
       align-items: center;
@@ -300,6 +312,11 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           </div>
 
           <div class="right-column">
+
+            <div id="userSpeakingContainer">
+              <span id="userSpeakingLabel">You speaking</span>
+              <canvas id="userAudioViz" width="260" height="48"></canvas>
+            </div>
 
             <div id="aiSpeakingContainer">
               <span id="aiSpeakingLabel">Gemini speaking</span>
