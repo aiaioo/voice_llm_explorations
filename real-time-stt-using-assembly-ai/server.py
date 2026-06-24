@@ -126,15 +126,42 @@ HTML = """\
 
     #placeholder p { font-size: 0.9rem; line-height: 1.7; }
 
-    #turns { display: flex; flex-direction: column; gap: 10px; }
+    #turns { display: flex; flex-direction: column; gap: 14px; }
 
     .turn {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding-left: 14px;
+      border-left: 3px solid var(--speaker-color, #6366f1);
+      animation: fadein 0.18s ease;
+    }
+
+    .turn-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .speaker-badge {
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--speaker-color, #6366f1);
+    }
+
+    .turn-time {
+      font-size: 0.7rem;
+      font-family: "SF Mono", "Fira Code", "Consolas", monospace;
+      color: #55557a;
+      letter-spacing: 0.03em;
+    }
+
+    .turn-text {
       font-size: 1rem;
       line-height: 1.8;
       color: #e0e0f0;
-      padding-left: 14px;
-      border-left: 3px solid #6366f1;
-      animation: fadein 0.18s ease;
     }
 
     @keyframes fadein {
@@ -327,6 +354,19 @@ registerProcessor('pcm-processor', PCMProcessor);
 `;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+const SPEAKER_COLORS = {
+  A: '#6366f1', B: '#10b981', C: '#f59e0b', D: '#f43f5e',
+  E: '#06b6d4', F: '#a78bfa', G: '#ec4899', H: '#84cc16',
+};
+
+function formatTime(ms) {
+  if (ms == null) return '';
+  const s   = ms / 1000;
+  const m   = Math.floor(s / 60);
+  const sec = (s % 60).toFixed(1).padStart(4, '0'); // e.g. "03.2"
+  return `${m}:${sec}`;
+}
+
 function setStatus(msg, cls = '') {
   statusEl.textContent = msg;
   statusEl.className   = cls;
@@ -336,13 +376,46 @@ function scrollToBottom() {
   panelEl.scrollTop = panelEl.scrollHeight;
 }
 
-function addFinalTurn(text) {
-  if (!text || !text.trim()) return;
+function addFinalTurn(msg) {
+  if (!msg.transcript || !msg.transcript.trim()) return;
   placeholder.style.display = 'none';
+
+  const speaker = msg.speaker_label || null;
+  const words   = Array.isArray(msg.words) ? msg.words : [];
+  const start   = words.length ? words[0].start          : null;
+  const end     = words.length ? words[words.length-1].end : null;
+  const color   = SPEAKER_COLORS[speaker] || '#6366f1';
+
+  const div = document.createElement('div');
+  div.className = 'turn';
+  div.style.setProperty('--speaker-color', color);
+
+  // ── meta row: speaker label + timestamps ──
+  const meta = document.createElement('div');
+  meta.className = 'turn-meta';
+
+  if (speaker) {
+    const badge = document.createElement('span');
+    badge.className   = 'speaker-badge';
+    badge.textContent = `Speaker ${speaker}`;
+    meta.appendChild(badge);
+  }
+
+  if (start != null && end != null) {
+    const time = document.createElement('span');
+    time.className   = 'turn-time';
+    time.textContent = `${formatTime(start)} – ${formatTime(end)}`;
+    meta.appendChild(time);
+  }
+
+  // ── transcript text ──
   const p = document.createElement('p');
-  p.className   = 'turn';
-  p.textContent = text;
-  turnsEl.appendChild(p);
+  p.className   = 'turn-text';
+  p.textContent = msg.transcript;
+
+  div.appendChild(meta);
+  div.appendChild(p);
+  turnsEl.appendChild(div);
   scrollToBottom();
 }
 
@@ -399,8 +472,9 @@ async function startSession() {
     //    The Python server never sees raw audio — it only issues the token.
     const params = new URLSearchParams({
       token,
-      speech_model: 'universal-3-5-pro',
-      sample_rate:  String(audioCtx.sampleRate),
+      speech_model:  'universal-3-5-pro',
+      sample_rate:   String(audioCtx.sampleRate),
+      speaker_labels: 'true',
     });
     ws = new WebSocket('wss://streaming.assemblyai.com/v3/ws?' + params);
 
@@ -465,7 +539,7 @@ function handleServerMessage(msg) {
       // A turn is complete when both end_of_turn AND turn_is_formatted are true.
       // Until then, update the partial transcript in place.
       if (msg.end_of_turn && msg.turn_is_formatted) {
-        addFinalTurn(msg.transcript);
+        addFinalTurn(msg);
         setPartial('');
       } else {
         setPartial(msg.transcript);
