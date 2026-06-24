@@ -237,9 +237,12 @@ function disconnect() {
   // Update UI
   updateStatus("connectionStatus", "Disconnected");
 
-  elements.startAudioBtn.textContent = "Start Audio";
-  elements.startVideoBtn.textContent = "Start Video";
-  elements.startScreenBtn.textContent = "Share Screen";
+  elements.startAudioBtn.classList.remove("active");
+  elements.startAudioBtn.title = "Start microphone";
+  elements.startVideoBtn.classList.remove("active");
+  elements.startVideoBtn.title = "Start camera";
+  elements.startScreenBtn.classList.remove("active");
+  elements.startScreenBtn.title = "Share screen";
 
   elements.videoPreview.hidden = true;
   elements.videoPreview.srcObject = null;
@@ -482,7 +485,8 @@ async function toggleAudio() {
       const selectedMicId = elements.micSelect.value;
       await state.audio.streamer.start(selectedMicId);
       state.audio.isStreaming = true;
-      elements.startAudioBtn.textContent = "Stop Audio";
+      elements.startAudioBtn.classList.add("active");
+      elements.startAudioBtn.title = "Stop microphone";
       addMessage("[Microphone on]", "system");
       startInputVisualization();
     } catch (error) {
@@ -492,7 +496,8 @@ async function toggleAudio() {
     stopInputVisualization();
     if (state.audio.streamer) state.audio.streamer.stop();
     state.audio.isStreaming = false;
-    elements.startAudioBtn.textContent = "Start Audio";
+    elements.startAudioBtn.classList.remove("active");
+    elements.startAudioBtn.title = "Start microphone";
     addMessage("[Microphone off]", "system");
     disconnect();
   }
@@ -520,7 +525,8 @@ async function toggleVideo() {
 
         elements.videoPreview.srcObject = video.srcObject;
         elements.videoPreview.hidden = false;
-        elements.startVideoBtn.textContent = "Stop Video";
+        elements.startVideoBtn.classList.add("active");
+        elements.startVideoBtn.title = "Stop camera";
         addMessage("[Camera on]", "system");
       } else {
         addMessage("[Connect to Gemini first]", "system");
@@ -534,7 +540,8 @@ async function toggleVideo() {
 
     elements.videoPreview.srcObject = null;
     elements.videoPreview.hidden = true;
-    elements.startVideoBtn.textContent = "Start Video";
+    elements.startVideoBtn.classList.remove("active");
+    elements.startVideoBtn.title = "Start camera";
     addMessage("[Camera off]", "system");
   }
 }
@@ -555,7 +562,8 @@ async function toggleScreen() {
         // Show screen preview in the same video element
         elements.videoPreview.srcObject = video.srcObject;
         elements.videoPreview.hidden = false;
-        elements.startScreenBtn.textContent = "Stop Sharing";
+        elements.startScreenBtn.classList.add("active");
+        elements.startScreenBtn.title = "Stop sharing screen";
         addMessage("[Screen sharing on]", "system");
       } else {
         addMessage("[Connect to Gemini first]", "system");
@@ -573,7 +581,8 @@ async function toggleScreen() {
       elements.videoPreview.hidden = true;
     }
 
-    elements.startScreenBtn.textContent = "Share Screen";
+    elements.startScreenBtn.classList.remove("active");
+    elements.startScreenBtn.title = "Share screen";
     addMessage("[Screen sharing off]", "system");
   }
 }
