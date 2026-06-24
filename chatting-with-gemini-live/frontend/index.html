@@ -1,71 +1,139 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Gemini Live API - Vanilla JS Example</title>
+  <title>Gemini Live API</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
+    /* ─── Theme tokens ─── */
     :root {
-      /* Google Brand Colors */
-      --google-blue: #4285f4;
-      --google-red: #db4437;
-      --google-yellow: #f4b400;
-      --google-green: #0f9d58;
+      --bg:             #f5f7fa;
+      --surface:        #ffffff;
+      --text-primary:   #1c2237;
+      --text-secondary: #5a6480;
+      --border:         #d8dde8;
+      --accent:         #4285f4;
+      --danger:         #db4437;
+      --danger-bg:      #fff0f0;
+      --viz-user-bg:    #e8faf0;
+      --viz-ai-bg:      #e8eeff;
+      --btn-bg:         #ffffff;
+      --btn-border:     #d0d5e0;
+      --btn-hover-bg:   #f0f4f8;
+
+      --text-lg:   1.75rem;
+      --text-md:   1.1rem;
+      --text-base: 0.9375rem;
+      --radius:    5px;
+    }
+
+    [data-theme="dark"] {
+      --bg:             #111827;
+      --surface:        #1f2937;
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --border:         #374151;
+      --accent:         #60a5fa;
+      --danger:         #f87171;
+      --danger-bg:      #3b1212;
+      --viz-user-bg:    #052e16;
+      --viz-ai-bg:      #0c1a3b;
+      --btn-bg:         #1f2937;
+      --btn-border:     #374151;
+      --btn-hover-bg:   #2d3748;
+    }
+
+    /* ─── Base reset ─── */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      font-family: Arial, sans-serif;
-      transition: all 0.5s ease-in-out;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: var(--text-base);
+      background: var(--bg);
+      color: var(--text-primary);
+      transition: background 0.25s, color 0.25s;
+      padding: 24px 16px 56px;
     }
 
-    #setupJsonDisplay {
-      background-color: #f4f4f4;
-      padding: 10px;
-      overflow-x: auto;
-      white-space: pre-wrap;
+    /* ─── Page wrapper ─── */
+    .page {
+      max-width: 760px;
+      margin: 0 auto;
     }
 
-    .user-transcript:before {
-      content: "USER SPEECH: ";
-      background-color: var(--google-yellow);
-      color: black;
+    /* ─── Theme toggle ─── */
+    #themeToggle {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text-primary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+      z-index: 100;
     }
 
-    .user::before {
-      content: "USER: ";
-      background-color: var(--google-green);
-      color: white;
+    #themeToggle:hover {
+      background: var(--btn-hover-bg);
+      border-color: var(--accent);
     }
 
-    .assistant:before {
-      content: "GEMINI SPEECH: ";
-      background-color: var(--google-blue);
-      color: white;
+    #themeToggle .icon-sun  { display: none; }
+    #themeToggle .icon-moon { display: block; }
+    [data-theme="dark"] #themeToggle .icon-sun  { display: block; }
+    [data-theme="dark"] #themeToggle .icon-moon { display: none; }
+
+    /* ─── Typography ─── */
+    h1 {
+      font-size: var(--text-lg);
+      font-weight: 700;
+      text-align: center;
+      margin: 0 0 24px;
+      color: var(--text-primary);
     }
 
-    .system:before {
-      content: "SYSTEM: ";
-      background-color: var(--google-red);
-      color: white;
+    h2 {
+      font-size: var(--text-md);
+      font-weight: 600;
+      text-align: center;
+      margin: 24px 0 12px;
+      color: var(--text-primary);
     }
 
+    /* ─── Connection status ─── */
+    #connectionStatus {
+      text-align: center;
+      margin: 0 0 16px;
+      color: var(--text-secondary);
+    }
+
+    /* ─── Media row (viz + video side by side) ─── */
     #mediaRow {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 24px;
-      margin: 8px 0;
+      margin: 0 0 12px;
     }
 
     #vizWrapper {
       display: flex;
-      gap: 20px;
-    }
-
-    #volumeControl {
-      text-align: center;
-      margin: 8px 0;
+      gap: 16px;
     }
 
     #userSpeakingContainer,
@@ -73,29 +141,109 @@
       display: none; /* set to "flex" when active */
       flex-direction: column;
       align-items: center;
-      gap: 4px;
+      gap: 6px;
+      color: var(--text-secondary);
     }
 
     #userAudioViz {
-      border-radius: 4px;
-      background: #f0fff4;
+      border-radius: var(--radius);
+      background: var(--viz-user-bg);
+      border: 1px solid var(--border);
     }
 
     #aiAudioViz {
-      border-radius: 4px;
-      background: #f0f4ff;
+      border-radius: var(--radius);
+      background: var(--viz-ai-bg);
+      border: 1px solid var(--border);
     }
 
-    h1, h2 {
-      text-align: center;
-      margin: 20px 0;
+    #videoPreview {
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
     }
 
-    #connectionStatus {
-      text-align: center;
-      margin: 8px 0;
+    /* ─── Volume control ─── */
+    #volumeControl {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin: 0 0 8px;
+      color: var(--text-secondary);
     }
 
+    #volume {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    /* ─── Chat container ─── */
+    #chatContainer {
+      height: 300px;
+      overflow-y: auto;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text-primary);
+      line-height: 1.6;
+      transition: background 0.25s, border-color 0.25s, color 0.25s;
+    }
+
+    /* ─── Chat message badges ─── */
+    .user-transcript::before {
+      content: "YOU";
+      background: #f4b400;
+      color: #1c1400;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      border-radius: var(--radius);
+      padding: 1px 5px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .user::before {
+      content: "USER";
+      background: #0f9d58;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      border-radius: var(--radius);
+      padding: 1px 5px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .assistant::before {
+      content: "GEMINI";
+      background: #4285f4;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      border-radius: var(--radius);
+      padding: 1px 5px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .system::before {
+      content: "SYSTEM";
+      background: #db4437;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      border-radius: var(--radius);
+      padding: 1px 5px;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    /* ─── Control icon buttons ─── */
     #controlButtons {
       display: flex;
       justify-content: center;
@@ -106,146 +254,198 @@
     .icon-btn {
       width: 52px;
       height: 52px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      background: white;
+      border: 1px solid var(--btn-border);
+      border-radius: var(--radius);
+      background: var(--btn-bg);
+      color: var(--text-primary);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
+      padding: 12px;
       transition: background 0.15s, border-color 0.15s, color 0.15s;
     }
 
     .icon-btn:hover {
-      background: #f5f5f5;
-      border-color: #aaa;
+      background: var(--btn-hover-bg);
+      border-color: var(--accent);
     }
 
     .icon-btn.active {
-      background: #fff0f0;
-      border-color: var(--google-red);
-      color: var(--google-red);
+      background: var(--danger-bg);
+      border-color: var(--danger);
+      color: var(--danger);
     }
 
     .icon-btn .stop-icon { display: none; }
     .icon-btn.active .start-icon { display: none; }
     .icon-btn.active .stop-icon { display: block; }
 
+    /* ─── Device selectors ─── */
     #deviceSelectors {
       display: flex;
       justify-content: center;
       gap: 40px;
-      margin-top: 20px;
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+
+    #deviceSelectors > div {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     #deviceSelectors label {
-      font-size: 0.9em;
+      color: var(--text-secondary);
+    }
+
+    #deviceSelectors select {
+      width: 200px;
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: var(--text-base);
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s, background 0.25s, color 0.25s;
+    }
+
+    #deviceSelectors select:focus {
+      border-color: var(--accent);
+    }
+
+    /* ─── Misc ─── */
+    #setupJsonDisplay {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px;
+      overflow-x: auto;
+      white-space: pre-wrap;
     }
   </style>
 </head>
 
 <body>
-  <h1>Gemini Flash Live - Multimodal LLM Test</h1>
+  <button id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+    <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+    </svg>
+    <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="5"/>
+      <line x1="12" y1="1" x2="12" y2="3"/>
+      <line x1="12" y1="21" x2="12" y2="23"/>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+      <line x1="1" y1="12" x2="3" y2="12"/>
+      <line x1="21" y1="12" x2="23" y2="12"/>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+    </svg>
+  </button>
 
-  <div id="connectionStatus">Not connected <span id="debugInfo" style="display:none">Ready to connect...</span></div>
+  <div class="page">
+    <h1>Gemini Flash Live - Multimodal LLM Test</h1>
 
-  <div id="mediaRow">
-    <div id="vizWrapper">
-      <div id="userSpeakingContainer">
-        <span id="userSpeakingLabel">You speaking</span>
-        <canvas id="userAudioViz" width="260" height="48"></canvas>
+    <div id="connectionStatus">Not connected <span id="debugInfo" style="display:none">Ready to connect...</span></div>
+
+    <div id="mediaRow">
+      <div id="vizWrapper">
+        <div id="userSpeakingContainer">
+          <span id="userSpeakingLabel">You speaking</span>
+          <canvas id="userAudioViz" width="260" height="48"></canvas>
+        </div>
+
+        <div id="aiSpeakingContainer">
+          <span id="aiSpeakingLabel">Gemini speaking</span>
+          <canvas id="aiAudioViz" width="260" height="48"></canvas>
+        </div>
       </div>
 
-      <div id="aiSpeakingContainer">
-        <span id="aiSpeakingLabel">Gemini speaking</span>
-        <canvas id="aiAudioViz" width="260" height="48"></canvas>
+      <video id="videoPreview" autoplay playsinline muted hidden width="400"></video>
+    </div>
+
+    <div id="volumeControl">
+      <label for="volume">Output volume</label>
+      <input type="range" id="volume" min="0" max="100" value="80" />
+      <span id="volumeValue">80%</span>
+    </div>
+
+    <h2>Chat</h2>
+
+    <div id="chatContainer">
+      <div>Click the microphone icon to connect and start chatting</div>
+    </div>
+
+    <div id="controlButtons">
+      <!-- Microphone -->
+      <button id="startAudioBtn" class="icon-btn" title="Start microphone">
+        <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+        <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23"/>
+          <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
+          <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+
+      <!-- Camera -->
+      <button id="startVideoBtn" class="icon-btn" title="Start camera">
+        <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
+        </svg>
+        <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34"/>
+          <polygon points="23 7 16 12 23 17 23 7"/>
+          <line x1="1" y1="1" x2="23" y2="23"/>
+        </svg>
+      </button>
+
+      <!-- Screen share -->
+      <button id="startScreenBtn" class="icon-btn" title="Share screen">
+        <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+          <polyline points="8 10 12 6 16 10"/>
+          <line x1="12" y1="6" x2="12" y2="14"/>
+        </svg>
+        <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <line x1="8" y1="21" x2="16" y2="21"/>
+          <line x1="12" y1="17" x2="12" y2="21"/>
+          <line x1="8" y1="7" x2="16" y2="13"/>
+          <line x1="16" y1="7" x2="8" y2="13"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Device Selectors -->
+    <div id="deviceSelectors">
+      <div>
+        <label for="micSelect">Microphone</label>
+        <select id="micSelect">
+          <option value="">Default Microphone</option>
+        </select>
       </div>
-    </div>
-
-    <video id="videoPreview" autoplay playsinline muted hidden width="400"></video>
-  </div>
-
-  <div id="volumeControl">
-    <label for="volume">Output volume:</label>
-    <input type="range" id="volume" min="0" max="100" value="80" />
-    <span id="volumeValue">80%</span>
-  </div>
-
-  <h2>Chat</h2>
-
-  <div id="chatContainer" style="
-        border: 1px solid;
-        height: 300px;
-        overflow-y: auto;
-        padding: 10px;
-      ">
-    <div>Click the microphone icon to connect and start chatting</div>
-  </div>
-
-  <div id="controlButtons">
-    <!-- Microphone -->
-    <button id="startAudioBtn" class="icon-btn" title="Start microphone">
-      <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-        <line x1="12" y1="19" x2="12" y2="23"/>
-        <line x1="8" y1="23" x2="16" y2="23"/>
-      </svg>
-      <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <line x1="1" y1="1" x2="23" y2="23"/>
-        <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"/>
-        <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"/>
-        <line x1="12" y1="19" x2="12" y2="23"/>
-        <line x1="8" y1="23" x2="16" y2="23"/>
-      </svg>
-    </button>
-
-    <!-- Camera -->
-    <button id="startVideoBtn" class="icon-btn" title="Start camera">
-      <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="23 7 16 12 23 17 23 7"/>
-        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"/>
-      </svg>
-      <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2m5.66 0H14a2 2 0 0 1 2 2v3.34"/>
-        <polygon points="23 7 16 12 23 17 23 7"/>
-        <line x1="1" y1="1" x2="23" y2="23"/>
-      </svg>
-    </button>
-
-    <!-- Screen share -->
-    <button id="startScreenBtn" class="icon-btn" title="Share screen">
-      <svg class="start-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/>
-        <line x1="12" y1="17" x2="12" y2="21"/>
-        <polyline points="8 10 12 6 16 10"/>
-        <line x1="12" y1="6" x2="12" y2="14"/>
-      </svg>
-      <svg class="stop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="3" width="20" height="14" rx="2"/>
-        <line x1="8" y1="21" x2="16" y2="21"/>
-        <line x1="12" y1="17" x2="12" y2="21"/>
-        <line x1="8" y1="7" x2="16" y2="13"/>
-        <line x1="16" y1="7" x2="8" y2="13"/>
-      </svg>
-    </button>
-  </div>
-
-  <!-- Device Selectors -->
-  <div id="deviceSelectors">
-    <div>
-      <label for="micSelect">Microphone:</label><br />
-      <select id="micSelect" style="width: 200px">
-        <option value="">Default Microphone</option>
-      </select>
-    </div>
-    <div>
-      <label for="cameraSelect">Camera:</label><br />
-      <select id="cameraSelect" style="width: 200px">
-        <option value="">Default Camera</option>
-      </select>
+      <div>
+        <label for="cameraSelect">Camera</label>
+        <select id="cameraSelect">
+          <option value="">Default Camera</option>
+        </select>
+      </div>
     </div>
   </div>
 
@@ -254,6 +454,20 @@
   <script src="mediaUtils.js"></script>
   <script src="tools.js"></script>
   <script src="script.js"></script>
+  <script>
+    (function () {
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (stored === 'dark' || (!stored && prefersDark)) {
+        document.documentElement.dataset.theme = 'dark';
+      }
+      document.getElementById('themeToggle').addEventListener('click', function () {
+        const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+        document.documentElement.dataset.theme = next;
+        localStorage.setItem('theme', next);
+      });
+    })();
+  </script>
 </body>
 
 </html>
