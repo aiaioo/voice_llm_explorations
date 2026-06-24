@@ -71,9 +71,6 @@
     }
 
     #aiSpeakingLabel {
-      font-size: 0.85em;
-      color: var(--google-blue);
-      font-weight: bold;
       white-space: nowrap;
     }
 
@@ -81,14 +78,27 @@
       border-radius: 4px;
       background: #f0f4ff;
     }
+
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    #deviceSelectors {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+    }
+
+    #deviceSelectors label {
+      font-size: 0.9em;
+    }
   </style>
 </head>
 
 <body>
-  <h1>Testing Gemini Live</h1>
-  <p>
-    Voice LLM with audio, video, and text streaming
-  </p>
+  <h1>Gemini Flash Live - Multimodal LLM Test</h1>
 
   <div class="container">
     <!-- Left Column: API Configuration -->
@@ -269,8 +279,6 @@ You are a helpful assistant. Be concise and friendly.</textarea>
     <div class="right-column">
       <!-- Media Controls -->
       <section>
-        <h2>Gemini Flash Live - Multimodal LLM Test</h2>
-
         <div id="connectionStatus">Not connected <span id="debugInfo" style="display:none">Ready to connect...</span></div>
 
         <br />
@@ -315,24 +323,6 @@ You are a helpful assistant. Be concise and friendly.</textarea>
             ">
           <div>Click "Start Audio" to connect and begin chatting</div>
         </div>
-        <br />
-        <!-- Device Selectors -->
-        <div style="margin-bottom: 10px">
-          <div style="margin-bottom: 5px">
-            <label for="micSelect">Microphone:</label><br />
-            <select id="micSelect" style="width: 100%; max-width: 300px">
-              <option value="">Default Microphone</option>
-            </select>
-          </div>
-
-          <div style="margin-bottom: 10px">
-            <label for="cameraSelect">Camera:</label><br />
-            <select id="cameraSelect" style="width: 100%; max-width: 300px">
-              <option value="">Default Camera</option>
-            </select>
-          </div>
-        </div>
-
         <!--
         <div>
           <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
@@ -348,6 +338,22 @@ You are a helpful assistant. Be concise and friendly.</textarea>
         <pre id="debugInfo">Ready to connect...</pre>
       </section>
       -->
+    </div>
+  </div>
+
+  <!-- Device Selectors -->
+  <div id="deviceSelectors">
+    <div>
+      <label for="micSelect">Microphone:</label><br />
+      <select id="micSelect" style="width: 200px">
+        <option value="">Default Microphone</option>
+      </select>
+    </div>
+    <div>
+      <label for="cameraSelect">Camera:</label><br />
+      <select id="cameraSelect" style="width: 200px">
+        <option value="">Default Camera</option>
+      </select>
     </div>
   </div>
 
