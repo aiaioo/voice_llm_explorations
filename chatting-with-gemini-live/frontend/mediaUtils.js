@@ -432,12 +432,17 @@ class AudioPlayer {
         "pcm-processor"
       );
 
+      // Create analyser node for visualizations
+      this.analyserNode = this.audioContext.createAnalyser();
+      this.analyserNode.fftSize = 256;
+
       // Create gain node for volume control
       this.gainNode = this.audioContext.createGain();
       this.gainNode.gain.value = this.volume;
 
-      // Connect nodes
-      this.workletNode.connect(this.gainNode);
+      // Connect nodes: worklet → analyser → gain → destination
+      this.workletNode.connect(this.analyserNode);
+      this.analyserNode.connect(this.gainNode);
       this.gainNode.connect(this.audioContext.destination);
 
       this.isInitialized = true;

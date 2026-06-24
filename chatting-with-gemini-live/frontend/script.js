@@ -9,6 +9,7 @@ const state = {
   audio: { streamer: null, player: null, isStreaming: false },
   video: { streamer: null, isStreaming: false },
   screen: { capture: null, isSharing: false },
+  ai: { speaking: false, animationId: null },
 };
 
 // DOM element cache
@@ -50,6 +51,8 @@ function initDOM() {
     "debugInfo",
     "setupJsonSection",
     "setupJsonDisplay",
+    "aiSpeakingContainer",
+    "aiAudioViz",
   ];
 
   ids.forEach((id) => {
@@ -241,6 +244,66 @@ function disconnect() {
   elements.videoPreview.srcObject = null;
 }
 
+// Audio visualization
+function startAudioVisualization() {
+  if (state.ai.speaking) return;
+  state.ai.speaking = true;
+  elements.aiSpeakingContainer.style.display = "flex";
+
+  const canvas = elements.aiAudioViz;
+  const ctx = canvas.getContext("2d");
+  const analyser = state.audio.player && state.audio.player.analyserNode;
+  if (!analyser) return;
+
+  const bufferLength = analyser.frequencyBinCount; // fftSize / 2 = 128
+  const dataArray = new Uint8Array(bufferLength);
+  const barCount = 32;
+  const barSpacing = 2;
+  const barWidth = (canvas.width - barSpacing * (barCount - 1)) / barCount;
+
+  function draw() {
+    state.ai.animationId = requestAnimationFrame(draw);
+    analyser.getByteFrequencyData(dataArray);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for (let i = 0; i < barCount; i++) {
+      // Sample frequency bins spread across the useful range (skip the top bins)
+      const binIndex = Math.floor((i / barCount) * (bufferLength * 0.75));
+      const amplitude = dataArray[binIndex] / 255;
+      const barHeight = Math.max(3, amplitude * canvas.height);
+
+      const x = i * (barWidth + barSpacing);
+      const y = (canvas.height - barHeight) / 2;
+
+      // Blue gradient based on amplitude
+      const blue = Math.round(200 + amplitude * 55);
+      const alpha = 0.5 + amplitude * 0.5;
+      ctx.fillStyle = `rgba(66, 133, ${blue}, ${alpha})`;
+      ctx.beginPath();
+      ctx.roundRect(x, y, barWidth, barHeight, 2);
+      ctx.fill();
+    }
+  }
+
+  draw();
+}
+
+function stopAudioVisualization() {
+  if (state.ai.animationId) {
+    cancelAnimationFrame(state.ai.animationId);
+    state.ai.animationId = null;
+  }
+  state.ai.speaking = false;
+  elements.aiSpeakingContainer.style.display = "none";
+
+  // Clear canvas
+  const canvas = elements.aiAudioViz;
+  if (canvas) {
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+  }
+}
+
 // Handle messages
 function handleMessage(message) {
   updateStatus("debugInfo", `Message: ${message.type}`);
@@ -253,6 +316,7 @@ function handleMessage(message) {
     case MultimodalLiveResponseType.AUDIO:
       if (state.audio.player) {
         state.audio.player.play(message.data);
+        startAudioVisualization();
       }
       break;
 
@@ -323,12 +387,14 @@ function handleMessage(message) {
     case MultimodalLiveResponseType.TURN_COMPLETE:
       console.log("Turn complete:", message.data);
       updateStatus("debugInfo", "Turn complete");
+      stopAudioVisualization();
       break;
 
     case MultimodalLiveResponseType.INTERRUPTED:
       console.log("Interrupted");
       addMessage("[Interrupted]", "system");
       if (state.audio.player) state.audio.player.interrupt();
+      stopAudioVisualization();
       break;
   }
 }

@@ -62,6 +62,25 @@
       background-color: var(--google-red);
       color: white;
     }
+
+    #aiSpeakingContainer {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0;
+    }
+
+    #aiSpeakingLabel {
+      font-size: 0.85em;
+      color: var(--google-blue);
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    #aiAudioViz {
+      border-radius: 4px;
+      background: #f0f4ff;
+    }
   </style>
 </head>
 
@@ -250,7 +269,7 @@ You are a helpful assistant. Be concise and friendly.</textarea>
     <div class="right-column">
       <!-- Media Controls -->
       <section>
-        <h2>Media Streaming</h2>
+        <h2>Gemini Flash Live - Multimodal LLM Test</h2>
 
         <div>
           <button id="connectBtn">Connect</button>
@@ -265,23 +284,6 @@ You are a helpful assistant. Be concise and friendly.</textarea>
 
         <div class="container">
           <div class="left-column">
-            <!-- Device Selectors -->
-            <div style="margin-bottom: 10px">
-              <div style="margin-bottom: 5px">
-                <label for="micSelect">Microphone:</label><br />
-                <select id="micSelect" style="width: 100%; max-width: 300px">
-                  <option value="">Default Microphone</option>
-                </select>
-              </div>
-
-              <div style="margin-bottom: 10px">
-                <label for="cameraSelect">Camera:</label><br />
-                <select id="cameraSelect" style="width: 100%; max-width: 300px">
-                  <option value="">Default Camera</option>
-                </select>
-              </div>
-            </div>
-
             <div>
               <button id="startAudioBtn">Start Audio</button>
               <button id="startVideoBtn">Start Video</button>
@@ -297,6 +299,12 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           </div>
 
           <div class="right-column">
+
+            <div id="aiSpeakingContainer">
+              <span id="aiSpeakingLabel">Gemini speaking</span>
+              <canvas id="aiAudioViz" width="260" height="48"></canvas>
+            </div>
+
             <video id="videoPreview" autoplay playsinline muted hidden width="400"></video>
           </div>
         </div>
@@ -315,6 +323,23 @@ You are a helpful assistant. Be concise and friendly.</textarea>
           <div>Connect to Gemini to start chatting</div>
         </div>
         <br />
+        <!-- Device Selectors -->
+        <div style="margin-bottom: 10px">
+          <div style="margin-bottom: 5px">
+            <label for="micSelect">Microphone:</label><br />
+            <select id="micSelect" style="width: 100%; max-width: 300px">
+              <option value="">Default Microphone</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom: 10px">
+            <label for="cameraSelect">Camera:</label><br />
+            <select id="cameraSelect" style="width: 100%; max-width: 300px">
+              <option value="">Default Camera</option>
+            </select>
+          </div>
+        </div>
+
         <!--
         <div>
           <input type="text" id="chatInput" placeholder="Type a message..." autocomplete="off" />
