@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# parakeet binaries and assets
+parakeet_and_nemotron_3.5/parakeet-cli
+parakeet_and_nemotron_3.5/parakeet-server
+parakeet_and_nemotron_3.5/models/
+parakeet_and_nemotron_3.5/*.wav
