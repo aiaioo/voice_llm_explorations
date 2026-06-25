@@ -1,5 +1,5 @@
 """
-WebSocket test client for server_gemini.py.
+WebSocket test client for server_streaming.py.
 Connects to ws://127.0.0.1:8766/ws, sends 3 seconds of a 440 Hz tone
 (which won't produce a transcript but proves the stream stays open),
 then sends silence while waiting for any response or clean close.
@@ -31,7 +31,7 @@ def _silence_chunk() -> bytes:
 
 
 async def run_test() -> None:
-    url = "ws://127.0.0.1:8766/ws"
+    url = "ws://127.0.0.1:8000/ws"
     print(f"Connecting to {url} ...")
 
     messages_received = []

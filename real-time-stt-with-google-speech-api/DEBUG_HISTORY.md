@@ -9,7 +9,7 @@ reverts to "Ready" with no error visible.
 
 ### Bug 1 — Wrong location in recognizer path
 
-**File:** `server_gemini.py`
+**File:** `server_streaming.py`
 
 ```python
 # before
@@ -31,7 +31,7 @@ Spotted by comparing against the working `microphone_transcribe.py`, which used
 
 ### Bug 2 — Missing regional gRPC endpoint on the async client
 
-**File:** `server_gemini.py`
+**File:** `server_streaming.py`
 
 ```python
 # before
@@ -55,7 +55,7 @@ Again spotted by comparing with `microphone_transcribe.py`, which passed
 
 ### Bug 3 — `await` incorrectly removed from `streaming_recognize` call
 
-**File:** `server_gemini.py`
+**File:** `server_streaming.py`
 
 ```python
 # original (correct)
@@ -85,7 +85,7 @@ could be mistaken for a fix.
 
 ### How the bugs were found
 
-- Bugs 1 & 2 were found by code inspection — diffing `server_gemini.py` against the
+- Bugs 1 & 2 were found by code inspection — diffing `server_streaming.py` against the
   known-working `microphone_transcribe.py`.
 - Bug 3 was introduced during debugging and caught by the live WebSocket test
   (`ws_test.py`), which checks that the server stream stays open for 5 seconds
