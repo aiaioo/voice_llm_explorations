@@ -36,6 +36,7 @@ function initDOM() {
     "connectionStatus",
     "startAudioBtn",
     "micSelect",
+    "outputSelect",
     "langSelect",
     "volume",
     "volumeValue",
@@ -54,10 +55,11 @@ function initDOM() {
   });
 }
 
-// Populate microphone selector
+// Populate microphone and speaker selectors
 async function populateMediaDevices() {
   try {
     const devices = await navigator.mediaDevices.enumerateDevices();
+
     elements.micSelect.innerHTML = '<option value="">Default Microphone</option>';
     devices
       .filter((device) => device.kind === "audioinput")
@@ -66,6 +68,16 @@ async function populateMediaDevices() {
         option.value = device.deviceId;
         option.textContent = device.label || `Microphone ${device.deviceId.substr(0, 8)}`;
         elements.micSelect.appendChild(option);
+      });
+
+    elements.outputSelect.innerHTML = '<option value="">Default Speaker</option>';
+    devices
+      .filter((device) => device.kind === "audiooutput")
+      .forEach((device) => {
+        const option = document.createElement("option");
+        option.value = device.deviceId;
+        option.textContent = device.label || `Speaker ${device.deviceId.substr(0, 8)}`;
+        elements.outputSelect.appendChild(option);
       });
   } catch (error) {
     console.error("Error enumerating devices:", error);
@@ -129,6 +141,9 @@ async function connect() {
     state.audio.streamer = new AudioStreamer(state.client);
     state.audio.player = new AudioPlayer();
     await state.audio.player.init();
+    if (elements.outputSelect.value) {
+      await state.audio.player.setOutputDevice(elements.outputSelect.value);
+    }
 
     updateStatus("debugInfo", "Connected successfully");
   } catch (error) {
@@ -389,6 +404,8 @@ async function toggleAudio() {
       await connect();
       const selectedMicId = elements.micSelect.value;
       await state.audio.streamer.start(selectedMicId);
+      // Re-enumerate now that mic permission is granted so device labels are populated
+      await populateMediaDevices();
       state.audio.isStreaming = true;
       elements.startAudioBtn.classList.add("active");
       elements.startAudioBtn.title = "Stop translation";
@@ -442,6 +459,11 @@ function updateVolume() {
 function initEventListeners() {
   elements.startAudioBtn.addEventListener("click", toggleAudio);
   elements.volume.addEventListener("input", updateVolume);
+  elements.outputSelect.addEventListener("change", async () => {
+    if (state.audio.player) {
+      await state.audio.player.setOutputDevice(elements.outputSelect.value);
+    }
+  });
 }
 
 // Initialize

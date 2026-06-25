@@ -515,6 +515,20 @@ class AudioPlayer {
   }
 
   /**
+   * Route audio output to a specific device
+   * @param {string} deviceId - The audiooutput device ID (empty string = default)
+   */
+  async setOutputDevice(deviceId) {
+    if (!this.audioContext) return;
+    try {
+      await this.audioContext.setSinkId(deviceId || '');
+      console.log('🔊 Output device changed:', deviceId || 'default');
+    } catch (error) {
+      console.error('Failed to set output device:', error);
+    }
+  }
+
+  /**
    * Clean up resources
    */
   destroy() {
